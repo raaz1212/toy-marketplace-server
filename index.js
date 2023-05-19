@@ -33,15 +33,21 @@ async function run() {
     });
 
     app.get("/toys/:id", async (req, res) => {
-      try {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await toysCollection.findOne(query);
-        res.send(result);
-      } catch (error) {
-        console.error(error);
-        res.status(500).send("Error fetching toy details");
-      }
+      console.log(req.params.id);
+      const toys = await toysCollection.findOne({
+        _id: new ObjectId(req.params.id),
+      });
+      res.send(toys);
+    });
+
+    app.get("/my-toys/:email", async (req, res) => {
+      console.log(req.params.id);
+      const jobs = await toysCollection
+        .find({
+          sellerEmail: req.params.email,
+        })
+        .toArray();
+      res.send(jobs);
     });
 
     app.post("/toys", async (req, res) => {
