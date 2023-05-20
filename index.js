@@ -42,28 +42,64 @@ async function run() {
     });
 
     app.get("/toys/:id", async (req, res) => {
-      console.log(req.params.id);
-      const toys = await toysCollection.findOne({
-        _id: new ObjectId(req.params.id),
-      });
-      res.send(toys);
+      try {
+        const toys = await toysCollection.findOne({
+          _id: new ObjectId(req.params.id),
+        });
+
+        if (!toys) {
+          res.status(404).send("Toy not found");
+          return;
+        }
+
+        res.send(toys);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.get("/my-toys/:email", async (req, res) => {
-      console.log(req.params.id);
-      const jobs = await toysCollection
-        .find({
-          sellerEmail: req.params.email,
-        })
-        .toArray();
-      res.send(jobs);
+      try {
+        const toys = await toysCollection
+          .find({
+            sellerEmail: req.params.email,
+          })
+          .toArray();
+
+        if (toys.length === 0) {
+          res.status(404).send("No toys found for the given email");
+          return;
+        }
+
+        res.send(toys);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.get("/toys/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await toysCollection.findOne(query);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        if (!ObjectId.isValid(id)) {
+          res.status(400).send("Invalid ID");
+          return;
+        }
+
+        const query = { _id: new ObjectId(id) };
+        const result = await toysCollection.findOne(query);
+
+        if (!result) {
+          res.status(404).send("Toy not found");
+          return;
+        }
+
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.post("/toys", async (req, res) => {
@@ -92,15 +128,26 @@ async function run() {
         },
       };
 
-      const result = await toysCollection.updateOne(filter, toy, options);
-      res.send(result);
+      try {
+        const result = await toysCollection.updateOne(filter, toy, options);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.delete("/toys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await toysCollection.deleteOne(query);
-      res.send(result);
+
+      try {
+        const result = await toysCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     // Send a ping to confirm a successful connection
