@@ -64,6 +64,29 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/toys/:id", async (req, res) => {
+      const id = req.params.id;
+      if (!ObjectId.isValid(id)) {
+        res.status(400).send("Invalid ID");
+        return;
+      }
+
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const newToys = req.body;
+
+      const toy = {
+        $set: {
+          price: newToys.price,
+          quantity: newToys.quantity,
+          description: newToys.description,
+        },
+      };
+
+      const result = await toysCollection.updateOne(filter, toy, options);
+      res.send(result);
+    });
+
     app.delete("/toys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
