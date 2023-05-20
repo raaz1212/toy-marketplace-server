@@ -27,7 +27,16 @@ async function run() {
     const toysCollection = client.db("toysDB").collection("toys");
 
     app.get("/toys", async (req, res) => {
-      const cursor = toysCollection.find();
+      const { sort } = req.query;
+      const sortOptions = {};
+
+      if (sort === "asc") {
+        sortOptions.price = 1; // Sort in ascending order
+      } else if (sort === "desc") {
+        sortOptions.price = -1; // Sort in descending order
+      }
+
+      const cursor = toysCollection.find().sort(sortOptions);
       const result = await cursor.toArray();
       res.send(result);
     });
